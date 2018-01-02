@@ -59,28 +59,21 @@ module.exports = settings => {
         options = {};
       }
 
+      let { args } = options;
+      if (!args) args = [];
+
       let execString = `java -jar ${jarPath}`;
 
-      if (!options.da) {
-        options.da = path.join(__dirname, 'config', 'dicom-anonymizer.default.script'); // use default anonymization script. -da flag must be present to do anonymization
+      if (!args.includes('-da')) {
+        args = args.concat(['-da', path.join(__dirname, 'config', 'dicom-anonymizer.default.script')]); // use default anonymization script. -da flag must be present to do anonymization
       }
-      if (!options.dpa) {
-        options.dpa = path.join(__dirname, 'config', 'dicom-pixel-anonymizer.default.script');
-      }
-
-      if (options) {
-        // Object.keys(options).forEach(flag => {
-        //   execString += ` -${flag} ${options[flag]}`;
-        // });
-        const args = [];
-        Object.keys(options).forEach(flag => {
-          args.push(`-${flag}`);
-          args.push(options[flag]);
-        });
-        execString += ` ${shellEscape(args)}`;
+      if (!args.includes('-dpa')) {
+        args = args.concat(['-dpa', path.join(__dirname, 'config', 'dicom-pixel-anonymizer.default.script')]);
       }
 
-      if (settings.verbose) {
+      execString += ` ${shellEscape(args)}`;
+
+      if (settings.verbose || options.verbose) {
         console.log(execString);
       }
 

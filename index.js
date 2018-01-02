@@ -4,7 +4,7 @@ const javaVersion = require('./java-version');
 
 const DEFAULT_DAT_JAR_PATH = path.join(__dirname, 'lib/DicomAnonymizerTool/DAT.jar');
 
-function checkDependencies(settings = {}) {
+function doCheckDependencies(settings = {}) {
   /**
    * Ensure Java installed, DAT jar available
    */
@@ -30,9 +30,7 @@ function checkDependencies(settings = {}) {
   });
 }
 
-module.exports.checkDependencies = (_settings = {}, callback) => {
-  const settings = Object.assign(_settings, { jarPath: _settings.jarPath || DEFAULT_DAT_JAR_PATH });
-
+function checkDependencies (settings, callback) {
   const print = (deps) => {
     const depString = `Dependencies:
     Java: ${deps.Java}
@@ -40,22 +38,25 @@ module.exports.checkDependencies = (_settings = {}, callback) => {
     console.log(depString);
   }
   const check = async function check () {
-    const deps = await checkDependencies(settings);
+    const deps = await doCheckDependencies(settings);
 
     if (settings.verbose) {
       print(deps);
     }
     return deps;
   }
-  if (callback && typeof callback === 'function') {
-    return check().then(r => callback(null, r)).catch(e => callback(e));
+  return function (callback) {
+    if (callback && typeof callback === 'function') {
+      return check().then(r => callback(null, r)).catch(e => callback(e));
+    }
+    return check();
   }
-  return check();
 }
 
-module.exports.anonymize = (_settings) => {
+module.exports = (_settings = {}) => {
   const settings = Object.assign(_settings, { jarPath: _settings.jarPath || DEFAULT_DAT_JAR_PATH });
-  const DATWrapper = require('./dat-wrapper')(settings);
-
-  return DATWrapper.anonymize;
-};
+  return {
+    checkDependencies: checkDependencies(settings),
+    anonymize: require('./dat-wrapper')(settings).anonymize,
+  }
+}
