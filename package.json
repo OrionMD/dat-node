@@ -27,6 +27,7 @@
     "eslint-plugin-import": "^2.8.0"
   },
   "dependencies": {
+    "cross-spawn": "^5.1.0",
     "shell-escape": "^0.2.0"
   }
 }

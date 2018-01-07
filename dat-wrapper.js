@@ -1,5 +1,4 @@
-const childProcess = require('child_process');
-const shellEscape = require('shell-escape');
+const spawn = require('cross-spawn');
 const path = require('path');
 
 /**
@@ -46,14 +45,16 @@ options: {
     -v specifies verbose output
  * }
  */
-module.exports = settings => {
+module.exports = (settings) => {
   if (!settings.jarPath) {
     throw new Error('Path to DAT.jar is required');
   }
-  const jarPath = settings.jarPath;
+  const { jarPath } = settings;
 
   return {
-    anonymize: (options, callback) => {
+    anonymize: (_options, _callback) => {
+      let options = _options;
+      let callback = _callback;
       if (!callback && typeof options === 'function') {
         callback = options;
         options = {};
@@ -61,24 +62,53 @@ module.exports = settings => {
 
       let { args } = options;
       if (!args) args = [];
+      if (typeof args === 'string') args = args.split(' ');
 
-      let execString = `java -jar ${jarPath}`;
+      // let execString = `java -jar ${jarPath}`;
 
       if (!args.includes('-da')) {
-        args = args.concat(['-da', path.join(__dirname, 'config', 'dicom-anonymizer.default.script')]); // use default anonymization script. -da flag must be present to do anonymization
+        args = args.concat([
+          '-da',
+          path.join(__dirname, 'config', 'dicom-anonymizer.default.script'),
+        ]); // use default anonymization script. -da flag must be present to do anonymization
       }
       if (!args.includes('-dpa')) {
-        args = args.concat(['-dpa', path.join(__dirname, 'config', 'dicom-pixel-anonymizer.default.script')]);
+        args = args.concat([
+          '-dpa',
+          path.join(__dirname, 'config', 'dicom-pixel-anonymizer.default.script'),
+        ]);
       }
 
-      execString += ` ${shellEscape(args)}`;
+      args.unshift('-jar', jarPath);
 
-      if (settings.verbose || options.verbose) {
-        console.log(execString);
+      if (options.verbose || settings.verbose) {
+        console.log('Executing:', 'java', args.join(' '));
       }
 
-      childProcess.exec(execString, (err, stdout, stderr) => {
-        return callback(err, stdout, stderr);
+      // execString += ` ${shellEscape(args)}`;
+
+      // if (settings.verbose || options.verbose) {
+      //   console.log(execString);
+      // }
+
+      // childProcess.exec(execString, (err, stdout, stderr) => callback(err, stdout, stderr));
+      const child = spawn('java', args);
+      let stdout = '';
+      let stderr = '';
+
+      /**
+       * Spawn will return a stream, but we want to just collect all the data and return it
+       * when it's done.
+       */
+      /* eslint no-return-assign: ["error", "except-parens"] */
+      child.stdout.on('data', data => (stdout += data));
+      child.stderr.on('data', data => (stderr += data));
+      child.on('error', callback);
+      child.on('close', (code) => {
+        if (options.verbose || settings.verbose) {
+          console.log('Process closed with code:', code);
+        }
+        callback(null, stdout, stderr);
       });
     },
   };
