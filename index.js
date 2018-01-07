@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const javaVersion = require('./java-version');
+const datWrapper = require('./dat-wrapper');
 
 const DEFAULT_DAT_JAR_PATH = path.join(__dirname, 'lib/DicomAnonymizerTool/DAT.jar');
 
@@ -8,7 +9,7 @@ function doCheckDependencies(settings = {}) {
   /**
    * Ensure Java installed, DAT jar available
    */
-  let dependencies = {
+  const dependencies = {
     Java: null,
     DicomAnonymizerTool: null,
   };
@@ -20,8 +21,8 @@ function doCheckDependencies(settings = {}) {
       }
       dependencies.Java = version;
 
-      fs.access(settings.jarPath, (err) => {
-        if (!err) {
+      return fs.access(settings.jarPath, (accessErr) => {
+        if (!accessErr) {
           dependencies.DicomAnonymizerTool = 'Jarfile found';
         }
         return resolve(dependencies);
@@ -30,33 +31,35 @@ function doCheckDependencies(settings = {}) {
   });
 }
 
-function checkDependencies (settings, callback) {
+function checkDependencies(settings) {
   const print = (deps) => {
     const depString = `Dependencies:
     Java: ${deps.Java}
     DicomAnonymizerTool: ${deps.DicomAnonymizerTool}`;
     console.log(depString);
-  }
-  const check = async function check () {
+  };
+  const check = async function check() {
     const deps = await doCheckDependencies(settings);
 
     if (settings.verbose) {
       print(deps);
     }
     return deps;
-  }
-  return function (callback) {
-    if (callback && typeof callback === 'function') {
-      return check().then(r => callback(null, r)).catch(e => callback(e));
+  };
+  return (cb) => {
+    if (cb && typeof cb === 'function') {
+      return check()
+        .then(r => cb(null, r))
+        .catch(e => cb(e));
     }
     return check();
-  }
+  };
 }
 
 module.exports = (_settings = {}) => {
   const settings = Object.assign(_settings, { jarPath: _settings.jarPath || DEFAULT_DAT_JAR_PATH });
   return {
     checkDependencies: checkDependencies(settings),
-    anonymize: require('./dat-wrapper')(settings).anonymize,
-  }
-}
+    anonymize: datWrapper(settings).anonymize,
+  };
+};
