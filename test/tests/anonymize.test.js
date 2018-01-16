@@ -4,17 +4,18 @@ const fs = require('fs-extra');
 
 const localOutputDir = path.join(__dirname, '../dicom/output');
 
-beforeAll(async (done) => {
-  await fs.emptyDir(localOutputDir);
+beforeAll(() => fs.emptyDir(localOutputDir));
 
+afterAll(() => fs.emptyDir(localOutputDir));
+
+test('check dependencies', (done) => {
   dat.checkDependencies((err, deps) => {
+    expect(err).toBeFalsy();
     expect(deps.Java).not.toBeFalsy();
     expect(deps.DicomAnonymizerTool).not.toBeFalsy();
     done();
   });
 });
-
-afterAll(() => fs.emptyDir(localOutputDir));
 
 test('successfully anonymize ct', (done) => {
   dat.anonymize(
