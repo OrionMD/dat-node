@@ -87,7 +87,7 @@ module.exports = (settings) => {
         args = args.concat(['-v']);
       }
 
-      args.unshift('-jar', jarPath);
+      args.unshift('-jar', '-Djava.awt.headless=true', jarPath);
 
       if (options.verbose || settings.verbose) {
         console.log('Executing:', 'java', args.join(' '));
