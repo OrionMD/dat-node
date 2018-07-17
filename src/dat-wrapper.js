@@ -1,6 +1,7 @@
 const spawn = require('cross-spawn');
 const path = require('path');
 const parser = require('./output-parsers/anonymize');
+const EventEmitter = require('events');
 
 /**
  *
@@ -56,6 +57,8 @@ module.exports = (settings) => {
     anonymize: (_options, _callback) => {
       let options = _options;
       let callback = _callback;
+      const emitter = new EventEmitter();
+
       if (!callback && typeof options === 'function') {
         callback = options;
         options = {};
@@ -110,18 +113,32 @@ module.exports = (settings) => {
        * when it's done.
        */
       /* eslint no-return-assign: ["error", "except-parens"] */
-      child.stdout.on('data', data => (stdout += data));
-      child.stderr.on('data', data => (stderr += data));
-      child.on('error', callback);
+      child.stdout.on('data', (data) => {
+        stdout += data;
+        emitter.emit('progress', parser(`${data}`));
+      });
+      child.stderr.on('data', (data) => {
+        stderr += data;
+        emitter.emit('error', `${data}`);
+      });
+      child.on('error', (err) => {
+        emitter.emit('error', err);
+        if (callback) return callback(err);
+        return true;
+      });
       child.on('close', (code) => {
         if (options.verbose || settings.verbose) {
           console.log('Process closed with code:', code);
         }
         if (stderr) return callback(stderr);
         parsed = parser(stdout);
-        return callback(null, { parsed, stdout });
+        emitter.emit('done', { parsed, stdout });
+        if (callback) {
+          return callback(null, { parsed, stdout });
+        }
+        return true;
       });
-      return true;
+      return emitter;
     },
   };
 };

@@ -11,7 +11,6 @@ const regexes = {
 module.exports = (output) => {
   const result = {
     files: [],
-    elapsedTime: null,
   };
   const blocks = output.split('----');
 
