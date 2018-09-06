@@ -75,13 +75,13 @@ module.exports = (settings) => {
       if (!args.includes('-da')) {
         args = args.concat([
           '-da',
-          path.join(__dirname, '..', 'config', 'dicom-anonymizer.default.script'),
+          path.join(__dirname, '..', 'config', 'dicom-anonymizer.default.script').replace('app.asar', 'app.asar.unpacked'),
         ]);
       }
       if (!args.includes('-dpa')) {
         args = args.concat([
           '-dpa',
-          path.join(__dirname, '..', 'config', 'dicom-pixel-anonymizer.default.script'),
+          path.join(__dirname, '..', 'config', 'dicom-pixel-anonymizer.default.script').replace('app.asar', 'app.asar.unpacked'),
         ]);
       }
 
