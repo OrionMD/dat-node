@@ -82,3 +82,44 @@ test('successfully skip non-dicom', (done) => {
     },
   );
 });
+
+test('successfully reject filtered dicom', (done) => {
+  dat.anonymize(
+    {
+      args: [
+        '-in',
+        path.join(__dirname, '../dicom/us'),
+        '-f',
+        path.join(__dirname, '../dat_scripts/filter_us.script'),
+        '-out',
+        localOutputDir,
+      ],
+    },
+    (err, output) => {
+      const { files } = output.parsed;
+
+      expect(files).toHaveLength(1);
+      expect(files[0].skipped).toEqual('non-matching DICOM file');
+      expect(files[0].pixelsAnonymized).toEqual(false);
+      expect(files[0].headersAnonymized).toEqual(false);
+      done();
+    },
+  );
+});
+
+test('handle already anonymized file', (done) => {
+  dat.anonymize(
+    {
+      args: ['-in', path.join(__dirname, '../dicom/anonymized'), '-out', localOutputDir],
+    },
+    (err, output) => {
+      const { files } = output.parsed;
+
+      expect(files).toHaveLength(1);
+      expect(files[0].pixelsAnonymized).toEqual(false);
+      expect(files[0].headersAnonymized).toEqual(true);
+      done();
+      done();
+    },
+  );
+});

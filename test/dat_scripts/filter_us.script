@@ -1,0 +1,6 @@
+// If anything in the below group is true, reject image
+!(
+  Modality.containsIgnoreCase("US")
+)
+// If BurnedInAnnotation is explicity set to NO, then allow
+// BurnedInAnnotation.equals("NO")
