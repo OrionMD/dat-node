@@ -1,6 +1,6 @@
 // const datNode = require('../..')({ verbose: true, jarPath: 'not-valid' });
-const datNode = require('../..')({ verbose: true });
 const path = require('path');
+const datNode = require('../..')({ verbose: true });
 
 datNode.anonymize(
   {

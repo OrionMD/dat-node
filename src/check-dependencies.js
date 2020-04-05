@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const javaVersion = require('./java-version');
 
-function checkDependencies(settings = {}) {
+async function checkDependencies(settings = {}) {
   /**
    * Ensure Java installed, DAT jar available
    */
@@ -10,15 +10,9 @@ function checkDependencies(settings = {}) {
     DicomAnonymizerTool: null,
   };
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      dependencies.Java = await javaVersion();
-      dependencies.DicomAnonymizerTool = (await fs.pathExists(settings.jarPath)) && 'Jarfile found';
-      resolve(dependencies);
-    } catch (err) {
-      reject(err);
-    }
-  });
+  dependencies.Java = await javaVersion();
+  dependencies.DicomAnonymizerTool = (await fs.pathExists(settings.jarPath)) && 'Jarfile found';
+  return dependencies;
 }
 
 function printFormattedDeps(deps) {

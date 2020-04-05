@@ -4,7 +4,7 @@
   "description": "Node wrapper for the RSNA DicomAnonymizerTool DICOM anonymization command line library.",
   "main": "index.js",
   "engines": {
-    "node": ">8.0"
+    "node": ">10"
   },
   "scripts": {
     "test": "jest"
@@ -17,13 +17,13 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/hopkinsdeeplearning/dat-node#readme",
   "devDependencies": {
-    "eslint": "^4.14.0",
-    "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.8.0",
-    "jest": "^22.0.6"
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "jest": "^25.2.7"
   },
   "dependencies": {
-    "cross-spawn": "^5.1.0",
-    "fs-extra": "^5.0.0"
+    "cross-spawn": "^7.0.2",
+    "fs-extra": "^9.0.0"
   }
 }
