@@ -1,6 +1,6 @@
 {
   "name": "dat-node",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Node wrapper for the RSNA DicomAnonymizerTool DICOM anonymization command line library.",
   "main": "index.js",
   "engines": {
